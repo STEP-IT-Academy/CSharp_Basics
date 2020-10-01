@@ -43,9 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GeometricFigures\Polygon.cs" />
-    <Compile Include="GeometricFigures\Rectangle.cs" />
-    <Compile Include="GeometricFigures\Triangle.cs" />
+    <Compile Include="Hospital\InfoService.cs" />
+    <Compile Include="Hospital\Patient.cs" />
+    <Compile Include="Menu\DiagnosisMenu.cs" />
+    <Compile Include="Menu\MainMenu.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
