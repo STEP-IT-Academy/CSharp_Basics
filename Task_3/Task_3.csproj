@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F5E8610E-800A-4FD6-8792-61CCB1715467}</ProjectGuid>
+    <ProjectGuid>{9ED543C4-3AFE-4B9B-86F3-320727CDC25D}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>HW_1</RootNamespace>
-    <AssemblyName>HW_1</AssemblyName>
+    <RootNamespace>Task_3</RootNamespace>
+    <AssemblyName>Task_3</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -43,9 +43,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GeometricFigures\Polygon.cs" />
-    <Compile Include="GeometricFigures\Rectangle.cs" />
-    <Compile Include="GeometricFigures\Triangle.cs" />
+    <Compile Include="Interfaces\IGetWeight.cs" />
+    <Compile Include="Port\FerryBoat\Ferry.cs" />
+    <Compile Include="Port\FerryBoat\FerryComparerByType.cs" />
+    <Compile Include="Port\InformationService.cs" />
+    <Compile Include="Port\People\Person.cs" />
+    <Compile Include="Port\Transportations\Cargo\Liquid.cs" />
+    <Compile Include="Port\Transportations\Cargo\TypeOfCargo.cs" />
+    <Compile Include="Port\Transportations\Cargo\UniformSolidMaterial.cs" />
+    <Compile Include="Port\Transportations\Tara\CylindricalTanks.cs" />
+    <Compile Include="Port\Transportations\Tara\Platform.cs" />
+    <Compile Include="Port\Transportations\Tara\RectangularContainer.cs" />
+    <Compile Include="Port\Transportations\Tara\TypeOfTara.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

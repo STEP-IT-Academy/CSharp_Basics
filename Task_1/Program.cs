@@ -1,6 +1,5 @@
 ﻿using System;
-using HW_1.Batteries;
-using HW_5;
+using HW_6.GeometricFigures;
 
 namespace HW_1
 {
@@ -8,51 +7,33 @@ namespace HW_1
     {
         static void Main(string[] args)
         {
-            // Создать объект фабрики
-            FlashlightFactory flashlightFactory = new FlashlightFactory();
+            Polygon[] polygons = new Polygon[4];
+            polygons[0] = new Triangle("треугольник", 5, 3, 4);
+            polygons[1] = new Triangle("треугольник", 6, 4, 5);
+            polygons[2] = new Rectangle("прямоугольник", 4, 2);
+            polygons[3] = new Rectangle("прямоугольник", 5, 3);
 
-            // Ввести количество фонариков, которое требуется  произвести на фабрике
-            Console.Write("Введите необходимое количество фонариков для их производства: ");
-            int countFlashLights = int.Parse(Console.ReadLine());
+            Array.Sort(polygons);
 
-            /* 
-             * Cформировать массив объектов IIlluminant, причем, каждый раз при создании фонарика тип батарейки определяется
-             * случайным образом (поставки батареек на фабрику хаотичны и нестабильны).
-             * Обусловимся, что 1 - батарейка типа Duracell, а 2 - типа China
-             */
+            Polygon.ShowFigures(polygons);
 
-            if (countFlashLights > 0)
-            {
-                IIlluminant[] illuminants = new IIlluminant[countFlashLights];
-                Random random = new Random();
-
-                for (int i = 0; i < illuminants.Length; i++)
-                {
-                    switch (random.Next(1, 3))
-                    {
-                        case 1: illuminants[i] = flashlightFactory.GetFlashlight(new DuracellBattery()); break;
-                        case 2: illuminants[i] = flashlightFactory.GetFlashlight(new ChinaBattery()); break;
-                    }
-                }
-
-                // Определить общее количество включений фонариков до их полной разрядки.
-                int commonCountTurnsOnBeforeDischarged = 0;
-                foreach (IIlluminant item in illuminants)
-                {
-                    item.On();
-                    while (item.IsLight())
-                    {
-                        item.Off();
-                        commonCountTurnsOnBeforeDischarged++;
-                        item.On();
-                    }
-                }
-
-                Console.WriteLine("Общее количество включений фонариков до их полной разрядки = " + commonCountTurnsOnBeforeDischarged);
-            }
-            else throw new Exception("Ошибка! Количество батареек не может быть равным 0 или отрицательным!");
+            double userValueForSquareCompare = 8.5;
+            Console.WriteLine("Заданная величина: " + userValueForSquareCompare + ". Количество фигур, площадь которых меньше заданной = " + CountFiguresWithSquareLessThanUserValue(polygons, userValueForSquareCompare));
 
             Console.ReadKey();
+        }
+
+        /// <summary>
+        ///  Определение количества фигур, площадь которых меньше заданной
+        /// </summary>
+        static int CountFiguresWithSquareLessThanUserValue(Polygon[] polygons, double userValueForSquareCompare)
+        {
+            short countObjects = 0;
+            foreach (Polygon item in polygons)
+            {
+                if (item.GetSquare() < userValueForSquareCompare) countObjects++;
+            }
+            return countObjects;
         }
     }
 }

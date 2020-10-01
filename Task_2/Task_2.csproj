@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F5E8610E-800A-4FD6-8792-61CCB1715467}</ProjectGuid>
+    <ProjectGuid>{F559A524-0B6C-49D8-A846-6B0515985F38}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>HW_1</RootNamespace>
-    <AssemblyName>HW_1</AssemblyName>
+    <RootNamespace>Task_2</RootNamespace>
+    <AssemblyName>Task_2</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -43,15 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GeometricFigures\Polygon.cs" />
-    <Compile Include="GeometricFigures\Rectangle.cs" />
-    <Compile Include="GeometricFigures\Triangle.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
