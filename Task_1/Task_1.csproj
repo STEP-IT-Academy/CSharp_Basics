@@ -43,13 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions.cs" />
-    <Compile Include="One_DimensionalArray.cs" />
+    <Compile Include="Batteries\Battery.cs" />
+    <Compile Include="Batteries\ChinaBattery.cs" />
+    <Compile Include="Batteries\DuracellBattery.cs" />
+    <Compile Include="FlashlightFactory.cs" />
+    <Compile Include="IIlluminant.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

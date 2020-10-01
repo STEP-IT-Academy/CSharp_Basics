@@ -1,4 +1,6 @@
 ﻿using System;
+using HW_1.Batteries;
+using HW_5;
 
 namespace HW_1
 {
@@ -6,44 +8,49 @@ namespace HW_1
     {
         static void Main(string[] args)
         {
-            // Ввод и вывод трех массивов A, В и С;
-            // Вариант 1. Ввод пользователем
+            // Создать объект фабрики
+            FlashlightFactory flashlightFactory = new FlashlightFactory();
 
-            /*
-            One_DimensionalArray[] arrays = new One_DimensionalArray[3];
+            // Ввести количество фонариков, которое требуется  произвести на фабрике
+            Console.Write("Введите необходимое количество фонариков для их производства: ");
+            int countFlashLights = int.Parse(Console.ReadLine());
 
-            for (int i = 0; i < 3; i++)
-            {
-                arrays[i] = new One_DimensionalArray();
-            }
-
-            One_DimensionalArray.ShowArrays(arrays);
-            */
-
-            // Вариант 2. Уже готовые данные
-
-            One_DimensionalArray A = new One_DimensionalArray(5, -10, 15, -1, -1);
-            One_DimensionalArray B = new One_DimensionalArray(-5, 4, -26);
-            One_DimensionalArray C = new One_DimensionalArray(-10, 7, 33);
-            One_DimensionalArray.ShowArrays(A, B, C);
-
-            // Вычисление общей суммы отрицательных элементов в массивах 5 * A и С
-            Console.Write("Вычисление общей суммы отрицательных элементов в массивах 5 * A и С = ");
-            int sumOfNegElem = One_DimensionalArray.TotalSumOFNegativeElements((5 * A), C);
-            Console.Write(sumOfNegElem);
-
-            Console.WriteLine();
-
-            // Вычисление общей суммы отрицательных элементов в массивах 2 * В, -А и С * 4
-            Console.Write("Вычисление общей суммы отрицательных элементов в массивах 2 * В, -А и С * 4 = ");
-            sumOfNegElem = One_DimensionalArray.TotalSumOFNegativeElements((2 * B), -A, (C * 4));
-            Console.WriteLine(sumOfNegElem);
-
-            /* Если сумма отрицательных элементов в массиве –А больше суммы отрицательных элементов в массиве А,
-             * заменить все отрицательные повторяющиеся элементы этого массива на значение этой суммы
+            /* 
+             * Cформировать массив объектов IIlluminant, причем, каждый раз при создании фонарика тип батарейки определяется
+             * случайным образом (поставки батареек на фабрику хаотичны и нестабильны).
+             * Обусловимся, что 1 - батарейка типа Duracell, а 2 - типа China
              */
-            A.ChangeNegElem();
-            Console.WriteLine(A);
+
+            if (countFlashLights > 0)
+            {
+                IIlluminant[] illuminants = new IIlluminant[countFlashLights];
+                Random random = new Random();
+
+                for (int i = 0; i < illuminants.Length; i++)
+                {
+                    switch (random.Next(1, 3))
+                    {
+                        case 1: illuminants[i] = flashlightFactory.GetFlashlight(new DuracellBattery()); break;
+                        case 2: illuminants[i] = flashlightFactory.GetFlashlight(new ChinaBattery()); break;
+                    }
+                }
+
+                // Определить общее количество включений фонариков до их полной разрядки.
+                int commonCountTurnsOnBeforeDischarged = 0;
+                foreach (IIlluminant item in illuminants)
+                {
+                    item.On();
+                    while (item.IsLight())
+                    {
+                        item.Off();
+                        commonCountTurnsOnBeforeDischarged++;
+                        item.On();
+                    }
+                }
+
+                Console.WriteLine("Общее количество включений фонариков до их полной разрядки = " + commonCountTurnsOnBeforeDischarged);
+            }
+            else throw new Exception("Ошибка! Количество батареек не может быть равным 0 или отрицательным!");
 
             Console.ReadKey();
         }
