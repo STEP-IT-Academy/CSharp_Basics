@@ -1,6 +1,7 @@
-﻿using HW8_T2;
-using HW8_T2.Hospital;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace Task_2
 {
@@ -8,35 +9,149 @@ namespace Task_2
     {
         static void Main(string[] args)
         {
-            // Создаем два объекта класса Врач.
-            Doctor[] doctors = new Doctor[2];
-            doctors[0] = new Doctor("Самохвалов", DateTime.Parse("29.12.19"), 13);
-            doctors[1] = new Doctor("Резков", DateTime.Parse("11.11.19"), 5);
+            List<Series> sourceSeries = new List<Series>()
+            {
+                new Series { Name = "Game of Thrones", ProducerSurname = "David Nutter", Genre = "Fantasy, Drama", NumberOfEpisodes = 80 },
+                new Series{ Name = "Breaking bad", ProducerSurname = "Michelle MacLaren", Genre = "Thriller, Crime", NumberOfEpisodes = 62}
+            };
+            List<Series> seriesFromFile = new List<Series>();
 
-            // Создает четыре объекта класса Пациент: два лечатся у одного врача, два у другого. Каждый пациент должен быть «зарегистрирован» в «своем» объекте класса Врач
-            Patient[] patients = new Patient[4];
-            patients[0] = new Patient("Петров", "перелом", DateTime.Parse("29.12.19 15:40"), 13);
-            patients[1] = new Patient("Иванов", "ушиб", DateTime.Parse("11.12.19 11:25"), 5);
-            patients[2] = new Patient("Сидоров", "вывих", DateTime.Parse("01.02.19 8:00"), 13);
-            patients[3] = new Patient("Козлов", "грипп", DateTime.Parse("25.06.19 18:35"), 5);
+            try
+            {
+                // Запись внесенной в таблицу информации о фильмах в структурированный файл c помощью класса BinaryWriter.
+                WriteData(sourceSeries);
 
-            // Регистрируем у соответствующего врача соответствующего ему пациента
-            doctors[0].ChangedInCabinetNumber += patients[0].ChangeCabinetNumber;
-            doctors[0].ChangedInCabinetNumber += patients[2].ChangeCabinetNumber;
-            doctors[1].ChangedInCabinetNumber += patients[1].ChangeCabinetNumber;
-            doctors[1].ChangedInCabinetNumber += patients[3].ChangeCabinetNumber;
+                FileInfo file = new FileInfo("Series.txt");
 
-            // Вывод информации о пациентах
-            InfoService infoService = new InfoService(doctors, patients);
-            infoService.ShowPatientInfo();
+                // Для отслеживания изменений с файлом
+                FileSystemWatcher fw = new FileSystemWatcher(@"C:\Users\kotka\source\repos\Task_2");
+                fw.IncludeSubdirectories = true;
 
-            // Изменяем номер кабинета у определенного врача
-            doctors[0].CabinetNumber = 8;
+                // Если будет запись в него или изменен его размер
+                fw.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size;
+                fw.Changed += new FileSystemEventHandler(OnChanged);
+                fw.EnableRaisingEvents = true;
 
-            // Выводим измененную информацию о пациентах
-            infoService.ShowChangedInfo();
 
+                // Считывание информации из файла c помощью класса BinaryReader  
+                ReadData(seriesFromFile);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            // Вывод информации в виде таблицы  
+            ShowInfo(seriesFromFile);
+
+            // Изменение любой записи в таблице и сохранение измененной строки таблицы в соответствующем месте файла, осуществляя прямой доступ.
+            // Допустим, что мы хотим изменить поле "ProducerSurname" у сериала "Игра престолов" c текущего на "Иванов"
+            string newSurname = "Ivanov";
+            newSurname = newSurname.PadRight(12);
+
+            byte[] input = Encoding.Default.GetBytes(newSurname);
+            try
+            {
+                using (FileStream fstream = File.OpenWrite("Series.txt"))
+                {
+                    // Зная структуру нашего файла, мы можем переместиться на нужную позицию
+                    fstream.Seek(seriesFromFile[0].Name.Length + 3, SeekOrigin.Begin);
+
+                    // И изменить запись
+                    fstream.Write(input, 0, input.Length);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            // Убеждаемся, что изменения были корректны
+            seriesFromFile.Clear();
+
+            try
+            {
+                ReadData(seriesFromFile);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            ShowInfo(seriesFromFile);
             Console.ReadKey();
+        }
+
+        // Запись внесенной в таблицу информации о фильмах в структурированный файл c помощью класса BinaryWriter.
+        static void WriteData(List<Series> series)
+        {
+            // Запись внесенной в таблицу информации о фильмах в структурированный файл c помощью класса BinaryWriter.
+            using (BinaryWriter bw = new BinaryWriter(File.Open("Series.txt", FileMode.Create)))
+            {
+                foreach (Series item in series)
+                {
+                    bw.Write(item.Name);
+                    bw.Write('\n');
+                    bw.Write(item.ProducerSurname);
+                    bw.Write('\n');
+                    bw.Write(item.Genre);
+                    bw.Write('\n');
+                    bw.Write(item.NumberOfEpisodes);
+                    bw.Write('\n');
+                }
+            }
+        }
+
+        // Считывание информации из файла c помощью класса BinaryReader  
+        static void ReadData(List<Series> series)
+        {
+            using (BinaryReader br = new BinaryReader(File.Open("Series.txt", FileMode.Open)))
+            {
+                while (br.PeekChar() > -1)
+                {
+                    string name = br.ReadString();
+                    br.ReadByte();
+                    string producerSurname = br.ReadString();
+                    br.ReadByte();
+                    string genre = br.ReadString();
+                    br.ReadByte();
+                    int numberOfEpisodes = br.ReadInt32();
+                    br.ReadByte();
+                    series.Add(new Series { Name = name, ProducerSurname = producerSurname, Genre = genre, NumberOfEpisodes = numberOfEpisodes });
+                }
+            }
+        }
+
+        // Вывод информации в виде таблицы  
+        static void ShowInfo(List<Series> series)
+        {
+            Console.WriteLine("╔══════════════╦════════════════╦════════════════════════╦════════════════════╦════════════════════╗");
+            Console.WriteLine("║      №       ║     Название   ║    Фамилия режиссера   ║  Количество серий  ║        Жанр        ║");
+            Console.WriteLine("╠══════════════╬════════════════╬════════════════════════╬════════════════════╬════════════════════╣");
+
+            int i = 1;
+            foreach (Series item in series)
+            {
+                Console.WriteLine($"║{i,14}║{item.Name,16}║{item.ProducerSurname,24}║{item.NumberOfEpisodes,20}║{item.Genre,20}║");
+                if (i == series.Count)
+                {
+                    Console.WriteLine("╚══════════════╩════════════════╩════════════════════════╩════════════════════╩════════════════════╝");
+                }
+                else
+                {
+                    Console.WriteLine("╠══════════════╬════════════════╬════════════════════════╬════════════════════╬════════════════════╣");
+                }
+                i++;
+            }
+        }
+
+        static void OnChanged(object source, FileSystemEventArgs e)
+        {
+            if (e.ChangeType == WatcherChangeTypes.Changed)
+            {
+                FileInfo file = new FileInfo(e.FullPath);
+                Console.WriteLine($"Измение в файле {file.Name}, размер которого составляет {file.Length}, а дата последнего изменения: {file.LastWriteTime}");
+            }
         }
     }
 }
