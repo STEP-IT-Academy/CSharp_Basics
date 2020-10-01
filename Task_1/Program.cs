@@ -1,130 +1,162 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Xml.Serialization;
+using HW_Attributes;
 
 namespace HW_1
 {
     class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Метод для вывода коллекций
+        /// </summary>
+        static void Show(object collection)
         {
-            // Полный путь до директории
-            string userRoot = @"C:\Users\kotka\source\repos\HW_Files";
-            DirectoryInfo root = new DirectoryInfo(userRoot);
+            object[] attributes = CheckForAttributes(collection);
 
-            // Заданная пользовательская маска
-            string userMask = "a*";
-
-            // Диапазон(дата последнего изменения) для поиска файлов
-            DateTime minRange = new DateTime(2020, 01, 11);   // 11.01.2020 
-            DateTime maxRange = new DateTime(2020, 01, 12);   // 11.01.2020 
-
-            // Поиск файлов в указанном каталоге и его подкаталогах
-            FileInfo[] files = root.GetFiles(userMask, SearchOption.AllDirectories).Where(f => f.LastWriteTime > minRange && f.LastWriteTime < maxRange).ToArray();
-
-            // Результат поиска сбрасываем в файл отчета
-            short i = 1;
-            if (files.Length != 0)
+            if (attributes != null)
             {
-                try
+                if (collection is List<Person>)
                 {
-                    FileStream fileStream = File.Create("Report.txt");
-
-                    using (StreamWriter streamWriter = new StreamWriter(fileStream, Encoding.Default))
+                    foreach (Person item in collection as List<Person>)
                     {
-                        foreach (FileInfo file in files)
-                        {
-                            streamWriter.WriteLine(file.Name);
-                        }
-                    }
-
-                    // Также необходимо вывести найденную информацию на экран в компактном виде(с нумерацией объектов)
-                    foreach (FileInfo file in files)
-                    {
-                        Console.WriteLine($"{i}. {file.Name};");
-                        i++;
+                        Console.WriteLine(ChangeSign(item.ToString(), (attributes[0] as SecretAttribute).SecretSymbol));
                     }
                 }
-                catch (Exception e)
+
+                if (collection is List<SomeonesCar>)
                 {
-                    Console.WriteLine(e.Message);
+                    foreach (SomeonesCar item in collection as List<SomeonesCar>)
+                    {
+                        Console.WriteLine("Владелец: " + ChangeSign(item.Owner.ToString(), (attributes[0] as SecretAttribute).SecretSymbol) + item.ToString());
+                    }
                 }
             }
-            else Console.WriteLine("Файлов, соответствующих заданной маске и дате последней модфикации, входящих в указанный диапазон, не найдено!");
+            else
+            {
+                if (collection is List<Car>)
+                {
+                    foreach (Car item in collection as List<Car>)
+                    {
+                        Console.WriteLine(item.ToString());
+                    }
+                }
+            }
+        }
 
-            // Запросить у пользователя дальнейшие действия
-            // 1. удалить все найденное
-            // 2. удалить указанный файл (каталог)
-            // 3. удалить диапазон файлов (каталогов)
+        /// <summary>
+        /// Метод, возвращающий атрибуты
+        /// </summary>
+        /// <param name="collection"></param>
+        static object[] CheckForAttributes(object collection)
+        {
+            object[] attributes = null;
+
+            if (collection is List<Person>)
+            {
+                foreach (Person item in collection as List<Person>)
+                {
+                    return attributes = item.GetType().GetCustomAttributes(typeof(SecretAttribute), false);
+                }
+            }
+
+            if (collection is List<Car>)
+            {
+                return null;
+            }
+
+            if (collection is List<SomeonesCar>)
+            {
+                foreach (SomeonesCar item in collection as List<SomeonesCar>)
+                {
+                    attributes = item.Owner.GetType().GetCustomAttributes(typeof(SecretAttribute), false);
+                    return attributes;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Метод для смены знака
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="sign"></param>
+        static StringBuilder ChangeSign(string str, string sign)
+        {
+            StringBuilder tmp = new StringBuilder(str.ToString());
+            for (int i = 0; i < tmp.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(tmp[i].ToString()) == true) continue;
+                else
+                {
+                    tmp[i] = char.Parse(tmp[i].ToString().Replace(tmp[i], char.Parse(sign)));
+                }
+            }
+            return tmp;
+        }
+
+        static void Main(string[] args)
+        {
+            // Потенциальные автовладельцы
+            List<Person> people = new List<Person>
+            {
+                new Person("Иван", "Иванов", 1959),
+                new Person("Анатолий", "Дятлов", 1971),
+                new Person("Василий", "Ваисльев", 1981)
+            };
+
+            Console.WriteLine(people.GetType().Attributes);
+
+            // Три автомобиля разной марки
+            List<Car> cars = new List<Car>
+            {
+                new Car("Жигули", 1600, 900),
+                new Car("Волга", 2300, 1200),
+                new Car("Лада", 1800, 2500)
+            };
+
+            // Список автомобилей с владельцами 
+            List<SomeonesCar> someonesCars = new List<SomeonesCar>
+            {
+                new SomeonesCar(people[0], cars[0], 1996, "синем"),
+                new SomeonesCar(people[1], cars[1], 2017, "красном"),
+                new SomeonesCar(people[2], cars[2], 2008, "сером"),
+            };
+
+            // Вывести информацию из этих массивов с помощью метода Show
+            Show(people);
+            Show(cars);
+            Show(someonesCars);
 
             try
             {
-                byte choice = 0;
-                while (choice < 5)
+                // Коллекцию  автовладельцев сериализовать в файл в бинарном формате
+                BinaryFormatter binaryFormatter = new BinaryFormatter();
+                using (FileStream fileStream = new FileStream("СarOwners.dat", FileMode.OpenOrCreate, FileAccess.Write))
                 {
-                    Console.Clear();
-                    Console.WriteLine("Нажмите 1 для удаления всего найденного.");
-                    Console.WriteLine("Нажмите 2 для удаленния указанного файла.");
-                    Console.WriteLine("Нажмите 3 для удаления диапазона файлов.");
-                    Console.WriteLine("Нажмите 4 для выхода.");
-                    Console.Write("Сделайте выбор: ");
-                    choice = Convert.ToByte(Console.ReadLine());
-
-                    switch (choice)
-                    {
-                        case 1:
-                            {
-                                // Удалить все найденное
-                                //foreach (FileInfo file in files)
-                                //{
-                                //    File.Delete(file.Name);
-                                //}
-
-                                if (files.Length == 0) Console.WriteLine("Удаление прошло успешно.");
-                                else Console.WriteLine("Удалить не получилось!");
-                                Console.ReadKey();
-
-                                break;
-                            }
-                        case 2:
-                            {
-                                // Удалить указанный файл
-                                string fileNameForDelete = "Имя файла, который нужно удалить.";
-                                //File.Delete(fileNameForDelete);
-
-                                if (File.Exists(fileNameForDelete))
-                                {
-                                    //File.Delete(fileNameForDelete);
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Указанного файла не существует.");
-                                    Console.ReadKey();
-                                    break;
-                                }
-
-                                if (!File.Exists(fileNameForDelete)) Console.WriteLine("Удаление прошло успешно!");
-
-                                Console.ReadKey();
-
-                                break;
-                            }
-                        case 3:
-                            {
-                                // Удалить диапазон файлов
-                                DateTime minRange2 = new DateTime(2022, 01, 11, 17, 13, 08);   // 11.01.2020 17:13:08
-                                DateTime maxRange2 = new DateTime(2029, 01, 12, 17, 13, 08);   // 11.01.2020 17:13:08
-                                File.Delete(files.Where(f => f.LastWriteTime > minRange2 && f.LastWriteTime < maxRange2).Select(f => new { f.Name }).ToString());
-                                Console.WriteLine("Удаление прошло успешно!");
-                                Console.ReadKey();
-
-                                break;
-                            }
-                        case 4: return;
-                    }
+                    binaryFormatter.Serialize(fileStream, people);
                 }
 
+                // Коллекцию автомобилей с владельцами сериализовать в файл в формате Xml (Марку машины и цвет сохранять как атрибуты элемента)
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<SomeonesCar>));
+                using (FileStream fileStream = new FileStream("SomeonesCars.xml", FileMode.OpenOrCreate))
+                {
+                    xmlSerializer.Serialize(fileStream, someonesCars);
+                }
+
+                // Информацию об автомобилях красного цвета не старше 5 лет и не дороже 5000 сохранить в текстовый файл в формате csv
+                using (StreamWriter streamWriter = new StreamWriter("CarOwners.txt", true, Encoding.Default))
+                {
+                    foreach (SomeonesCar item in someonesCars.Where(c => c.Color == "красном" && c.FindTheAgeOfTheCar() < 6 && c.Price < 5000))
+                    {
+                        streamWriter.WriteLine($"{item.Owner.Name};{item.Owner.Surname};{item.Owner.YearOfBirth};{item.Mark};{item.EngineCapacity};{item.Price};{item.YearOfIssue};{item.Color}");
+                    }
+                }
             }
             catch (Exception e)
             {
