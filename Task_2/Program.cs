@@ -1,7 +1,5 @@
-﻿using System;
-using System.Text;
-using System.Threading;
-using GameCar;
+﻿using HW4_T2;
+using System;
 
 namespace Task_2
 {
@@ -9,75 +7,42 @@ namespace Task_2
     {
         static void Main(string[] args)
         {
-            Console.OutputEncoding = Encoding.Unicode;
-            Console.CursorVisible = false;
+            PurchaseGoods[] purchaseGoods = new PurchaseGoods[6];
+            purchaseGoods[0] = new PurchaseGoods("Батончики", 1.56m, 22);
+            purchaseGoods[1] = new PurchaseGoods("Печенье", 1.15m, 10);
+            purchaseGoods[2] = new FixDiscountOnPrice("Шампунь", 3.35m, 5);
+            purchaseGoods[3] = new FixDiscountOnPrice("Стулья", 40.5m, 33);
+            purchaseGoods[4] = new FixDiscount("Шпалы", 120m, 100);
+            purchaseGoods[5] = new FixDiscount("Ручки", 0.69m, 41);
 
-            try
+            decimal maxCostPurchase = 0;
+            int maxPurchaseIndex = 0;
+            bool equalPurchases = true;
+
+            for (int i = 0; i < purchaseGoods.Length; i++)
             {
-                Console.Write("Введите количество машин(от 2 до 7 включительно): ");
-                int countCars = int.Parse(Console.ReadLine());
-                if (countCars < 2 || countCars > 7) throw new Exception("Введенно неправильное количество машин!");
-                Console.Write("Укажите номер машины, на который вы будете ставить: ");
-                int betCarNumber = int.Parse(Console.ReadLine());
-                Car[] cars = new Car[countCars];
-                int start = 0;
-                int i, j;
-                for (i = 0, j = 0; i < cars.Length; i++, j += 2)
-                {
-                    cars[i] = new Car(ConsoleColor.Red, i + 1, start, i + j);
-                    cars[i].View();
-                }
-                Console.SetCursorPosition(0, j + 3);
-                Console.WriteLine("Для старта нажмите клавишу");
-                Console.ReadKey();
-                Console.SetCursorPosition(0, j + 3);
-                Console.WriteLine("                               ");
-                //гонка
-                Random random = new Random();
-                int finish = Console.WindowWidth - cars[0].Length - 2;
-                int[] winers = new int[cars.Length];//победители
-                bool gameOver = false;
-                while (!gameOver)
-                {
-                    for (i = 0; i < cars.Length; i++)
-                    {
-                        int dx = random.Next(5);
+                Console.WriteLine(purchaseGoods[i]);
 
-                        if (cars[i].X + dx <= finish)
-                            cars[i].Move(dx);
-                        else
-                        {
-                            cars[i].Move(finish - cars[i].X);
-                            winers[i] = 1;
-                            if (winers[i] == betCarNumber)
-                            {
-                                Console.WriteLine();
-                                Console.WriteLine("Вы выйграли!");
-                            }
-                            else
-                            {
-                                Console.WriteLine();
-                                Console.WriteLine("Вы проиграли!");
-                            }
-                            gameOver = true;
-                        }
-                    }
-                    Thread.Sleep(100);
+                if (purchaseGoods[i].GetCost() > maxCostPurchase)
+                {
+                    maxCostPurchase = purchaseGoods[i].GetCost();
+                    maxPurchaseIndex = i;
                 }
 
-                Console.WriteLine("\nПобедители:");
-                for (i = 0; i < winers.Length; i++)
+                if (i > 0 && equalPurchases)
                 {
-                    if (winers[i] == 1)
-                        Console.WriteLine("Машинка № " + (i + 1));
+                    equalPurchases = purchaseGoods[i - 1].Equals(purchaseGoods[i]);
+                }
+
+                if (i == (purchaseGoods.Length - 1))
+                {
+                    Console.WriteLine("Покупка с максимальной стоимостью: " + purchaseGoods[maxPurchaseIndex]);
+
+                    if (equalPurchases) Console.WriteLine("Все покупки равны!");
+                    else Console.WriteLine("Покупки не равны!");
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            //car.Color = ConsoleColor.Red;
-            Console.WriteLine("Все работает");
+
             Console.ReadKey();
         }
     }

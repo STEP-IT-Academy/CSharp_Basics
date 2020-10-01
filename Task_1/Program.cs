@@ -1,5 +1,4 @@
 ﻿using System;
-using HW3_T1;
 
 namespace HW_1
 {
@@ -7,28 +6,44 @@ namespace HW_1
     {
         static void Main(string[] args)
         {
-            // Вариант ввода данных в массив студенов с клавиатуры
+            // Ввод и вывод трех массивов A, В и С;
+            // Вариант 1. Ввод пользователем
 
-            // StudentsCollection studentsCollection = new StudentsCollection();
+            /*
+            One_DimensionalArray[] arrays = new One_DimensionalArray[3];
 
-            // Вариант с уже заполенными данными
+            for (int i = 0; i < 3; i++)
+            {
+                arrays[i] = new One_DimensionalArray();
+            }
 
-            Student[] studentsArray = new Student[3];
-            studentsArray[0] = new Student("Иванов", "P11018", 2, 10, 4, 9);
-            studentsArray[1] = new Student("Петров", "P11018", 5, 6, 2, 10);
-            studentsArray[2] = new Student("Сидоров", "P11020", 10, 7, 5, 10);
+            One_DimensionalArray.ShowArrays(arrays);
+            */
 
-            StudentsCollection studentsCollection = new StudentsCollection(studentsArray);
+            // Вариант 2. Уже готовые данные
 
-            // Вывод списка всех студентов с указанием среднего балла каждого студента в порядке возрастания среднего балла
-            studentsCollection.ShowStudents();
+            One_DimensionalArray A = new One_DimensionalArray(5, -10, 15, -1, -1);
+            One_DimensionalArray B = new One_DimensionalArray(-5, 4, -26);
+            One_DimensionalArray C = new One_DimensionalArray(-10, 7, 33);
+            One_DimensionalArray.ShowArrays(A, B, C);
 
-            // Определение количества студентов, получивших больше двух оценок 10 в массиве
-            Console.WriteLine("Количество студентов, получивших больше двух оценок 10 = " + studentsCollection.CountStuentsWithGrades_10_More_2());
+            // Вычисление общей суммы отрицательных элементов в массивах 5 * A и С
+            Console.Write("Вычисление общей суммы отрицательных элементов в массивах 5 * A и С = ");
+            int sumOfNegElem = One_DimensionalArray.TotalSumOFNegativeElements((5 * A), C);
+            Console.Write(sumOfNegElem);
 
-            // Вывод списка двоечников в заданной группе
-            studentsCollection.ShowQuarters("P11018");
             Console.WriteLine();
+
+            // Вычисление общей суммы отрицательных элементов в массивах 2 * В, -А и С * 4
+            Console.Write("Вычисление общей суммы отрицательных элементов в массивах 2 * В, -А и С * 4 = ");
+            sumOfNegElem = One_DimensionalArray.TotalSumOFNegativeElements((2 * B), -A, (C * 4));
+            Console.WriteLine(sumOfNegElem);
+
+            /* Если сумма отрицательных элементов в массиве –А больше суммы отрицательных элементов в массиве А,
+             * заменить все отрицательные повторяющиеся элементы этого массива на значение этой суммы
+             */
+            A.ChangeNegElem();
+            Console.WriteLine(A);
 
             Console.ReadKey();
         }

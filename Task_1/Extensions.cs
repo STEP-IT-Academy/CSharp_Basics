@@ -1,27 +1,18 @@
-﻿using System;
-using System.Linq;
-
-namespace HW3_T1
+﻿namespace HW_1
 {
     static class Extensions
     {
-        // Определение студентов-отличников и двоечников
-        public static string ExcellentOrQuarter(this Student obj)
+        // Расширение для смены знаков элементов массива на противоположный
+        public static int[] ChangeSign(this One_DimensionalArray obj)
         {
-            try
+            int[] someArray = new int[obj.GetArray.Length];
+
+            for (int i = 0; i < someArray.Length; i++)
             {
-                return obj.Grades.Average() > 8 ? "Отличник" : "Двоечник";
-            }
-            catch(ArgumentOutOfRangeException aoor)
-            {
-                Console.WriteLine(aoor.Message);
-            }
-            catch(InvalidOperationException io)
-            {
-                Console.WriteLine(io.Message);
+                someArray[i] = (obj.GetArray[i] * -1);
             }
 
-             return null;
+            return someArray;
         }
     }
 }
