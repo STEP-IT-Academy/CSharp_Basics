@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F5E8610E-800A-4FD6-8792-61CCB1715467}</ProjectGuid>
+    <ProjectGuid>{30E71397-363A-45AB-86BF-C45A5A2BBBDF}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>HW_1</RootNamespace>
-    <AssemblyName>HW_1</AssemblyName>
+    <RootNamespace>Task_2</RootNamespace>
+    <AssemblyName>Task_2</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -43,6 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Hospital\Doctor.cs" />
+    <Compile Include="Hospital\DoctorEventArgs.cs" />
+    <Compile Include="Hospital\InfoService.cs" />
+    <Compile Include="Hospital\Patient.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
