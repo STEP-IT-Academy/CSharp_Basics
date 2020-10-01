@@ -1,4 +1,5 @@
 ﻿using System;
+using HW3_T1;
 
 namespace HW_1
 {
@@ -6,70 +7,28 @@ namespace HW_1
     {
         static void Main(string[] args)
         {
-            Random rand = new Random();
-            double amountOfMoney = rand.Next(100, 500); // Капитал игрока
-            double guessedNumber; // Загаднное(Random) число
-            double enteredNumber; // Введенное пользователем число
-            double percentMinus; // Процент от суммы, начиная с которого будет вычитаться при неудачных попытках
-            double percentPlus; // Процент от суммы, начиная с которого будет прибавляться при удачных попытках
-            int attempts; // Кол-во попыток
+            // Вариант ввода данных в массив студенов с клавиатуры
 
-            /*
-                Если введенное число совпало с загаданным с первого раза - к капиталу игрока прибавляется 50 % от его текущей суммы
-                Если введенное число не совпало с загаданным с первого раза - с капитала игрока убавляется 55 % от его текущей суммы
-                Начиная со 2-го раза к числу будет прибавляться уже (50 / кол-во попыток) и убавляться - (55 / кол-во попыток)
-           */
+            // StudentsCollection studentsCollection = new StudentsCollection();
 
-            do
-            {
-                try
-                {
-                    Console.WriteLine("Загаданное число = " + (guessedNumber = rand.Next(0, 100))); // Загадываем число
-                    Console.WriteLine("Ваша текущая сумма = " + amountOfMoney + " рублей");
-                    Console.Write("Введите количество попыток для угадывания числа: ");
-                    attempts = int.Parse(Console.ReadLine());
-                    percentMinus = 55;
-                    percentPlus = 50;
+            // Вариант с уже заполенными данными
 
-                    for (int i = 0; i < attempts; ++i)
-                    {
-                        Console.Write("Введите число: ");
-                        enteredNumber = int.Parse(Console.ReadLine());
+            Student[] studentsArray = new Student[3];
+            studentsArray[0] = new Student("Иванов", "P11018", 2, 10, 4, 9);
+            studentsArray[1] = new Student("Петров", "P11018", 5, 6, 2, 10);
+            studentsArray[2] = new Student("Сидоров", "P11020", 10, 7, 5, 10);
 
-                        if (enteredNumber == guessedNumber)
-                        {
-                            Console.WriteLine("Вы угадали число с " + (i + 1) + "-ой попытки!");
+            StudentsCollection studentsCollection = new StudentsCollection(studentsArray);
 
-                            amountOfMoney += (percentPlus * amountOfMoney) / 100;
-                            amountOfMoney = Math.Floor(amountOfMoney);
+            // Вывод списка всех студентов с указанием среднего балла каждого студента в порядке возрастания среднего балла
+            studentsCollection.ShowStudents();
 
-                            i = attempts;
-                        }
-                        else
-                        {
-                            percentPlus /= attempts;
-                            percentMinus /= attempts;
+            // Определение количества студентов, получивших больше двух оценок 10 в массиве
+            Console.WriteLine("Количество студентов, получивших больше двух оценок 10 = " + studentsCollection.CountStuentsWithGrades_10_More_2());
 
-                            amountOfMoney -= (percentMinus * amountOfMoney) / 100;
-                            amountOfMoney = Math.Floor(amountOfMoney);
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-
-            } while (amountOfMoney > 0 && amountOfMoney < 1000);
-
-            if (amountOfMoney >= 1000)
-            {
-                Console.WriteLine("Игра окончена! Вы - победитель!");
-            }
-            else
-            {
-                Console.WriteLine("Игра окончена! Вы - банкрот!");
-            }
+            // Вывод списка двоечников в заданной группе
+            studentsCollection.ShowQuarters("P11018");
+            Console.WriteLine();
 
             Console.ReadKey();
         }
