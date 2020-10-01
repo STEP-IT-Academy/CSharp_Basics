@@ -2,161 +2,111 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
+using System.Xml;
+using System.Xml.Schema;
 using System.Xml.Serialization;
-using HW_Attributes;
 
 namespace HW_1
 {
     class Program
     {
-        /// <summary>
-        /// Метод для вывода коллекций
-        /// </summary>
-        static void Show(object collection)
+        static void ValidationCallBack(object sender, ValidationEventArgs eventArgs)
         {
-            object[] attributes = CheckForAttributes(collection);
-
-            if (attributes != null)
-            {
-                if (collection is List<Person>)
-                {
-                    foreach (Person item in collection as List<Person>)
-                    {
-                        Console.WriteLine(ChangeSign(item.ToString(), (attributes[0] as SecretAttribute).SecretSymbol));
-                    }
-                }
-
-                if (collection is List<SomeonesCar>)
-                {
-                    foreach (SomeonesCar item in collection as List<SomeonesCar>)
-                    {
-                        Console.WriteLine("Владелец: " + ChangeSign(item.Owner.ToString(), (attributes[0] as SecretAttribute).SecretSymbol) + item.ToString());
-                    }
-                }
-            }
+            if (eventArgs.Severity == XmlSeverityType.Warning)
+                Console.WriteLine("\tОшибка: Выбранная схема не найдена.  Валидация не прошла." + eventArgs.Message);
             else
-            {
-                if (collection is List<Car>)
-                {
-                    foreach (Car item in collection as List<Car>)
-                    {
-                        Console.WriteLine(item.ToString());
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Метод, возвращающий атрибуты
-        /// </summary>
-        /// <param name="collection"></param>
-        static object[] CheckForAttributes(object collection)
-        {
-            object[] attributes = null;
-
-            if (collection is List<Person>)
-            {
-                foreach (Person item in collection as List<Person>)
-                {
-                    return attributes = item.GetType().GetCustomAttributes(typeof(SecretAttribute), false);
-                }
-            }
-
-            if (collection is List<Car>)
-            {
-                return null;
-            }
-
-            if (collection is List<SomeonesCar>)
-            {
-                foreach (SomeonesCar item in collection as List<SomeonesCar>)
-                {
-                    attributes = item.Owner.GetType().GetCustomAttributes(typeof(SecretAttribute), false);
-                    return attributes;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Метод для смены знака
-        /// </summary>
-        /// <param name="str"></param>
-        /// <param name="sign"></param>
-        static StringBuilder ChangeSign(string str, string sign)
-        {
-            StringBuilder tmp = new StringBuilder(str.ToString());
-            for (int i = 0; i < tmp.Length; i++)
-            {
-                if (string.IsNullOrWhiteSpace(tmp[i].ToString()) == true) continue;
-                else
-                {
-                    tmp[i] = char.Parse(tmp[i].ToString().Replace(tmp[i], char.Parse(sign)));
-                }
-            }
-            return tmp;
+                Console.WriteLine("\tОшибка валидации: " + eventArgs.Message);
         }
 
         static void Main(string[] args)
         {
-            // Потенциальные автовладельцы
-            List<Person> people = new List<Person>
-            {
-                new Person("Иван", "Иванов", 1959),
-                new Person("Анатолий", "Дятлов", 1971),
-                new Person("Василий", "Ваисльев", 1981)
-            };
-
-            Console.WriteLine(people.GetType().Attributes);
-
-            // Три автомобиля разной марки
-            List<Car> cars = new List<Car>
-            {
-                new Car("Жигули", 1600, 900),
-                new Car("Волга", 2300, 1200),
-                new Car("Лада", 1800, 2500)
-            };
-
-            // Список автомобилей с владельцами 
-            List<SomeonesCar> someonesCars = new List<SomeonesCar>
-            {
-                new SomeonesCar(people[0], cars[0], 1996, "синем"),
-                new SomeonesCar(people[1], cars[1], 2017, "красном"),
-                new SomeonesCar(people[2], cars[2], 2008, "сером"),
-            };
-
-            // Вывести информацию из этих массивов с помощью метода Show
-            Show(people);
-            Show(cars);
-            Show(someonesCars);
-
             try
             {
-                // Коллекцию  автовладельцев сериализовать в файл в бинарном формате
-                BinaryFormatter binaryFormatter = new BinaryFormatter();
-                using (FileStream fileStream = new FileStream("СarOwners.dat", FileMode.OpenOrCreate, FileAccess.Write))
-                {
-                    binaryFormatter.Serialize(fileStream, people);
-                }
+                // Проверка корректности данных в XML–файле в соответствии с XSD–схемой.
+                XmlSchemaSet schemaSet = new XmlSchemaSet();
+                schemaSet.Add("http://tempuri.org/Books.xsd", "BooksScheme.xsd");
 
-                // Коллекцию автомобилей с владельцами сериализовать в файл в формате Xml (Марку машины и цвет сохранять как атрибуты элемента)
-                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<SomeonesCar>));
-                using (FileStream fileStream = new FileStream("SomeonesCars.xml", FileMode.OpenOrCreate))
-                {
-                    xmlSerializer.Serialize(fileStream, someonesCars);
-                }
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.ValidationType = ValidationType.Schema;
+                settings.Schemas = schemaSet;
+                settings.ValidationEventHandler += new ValidationEventHandler(ValidationCallBack);
 
-                // Информацию об автомобилях красного цвета не старше 5 лет и не дороже 5000 сохранить в текстовый файл в формате csv
-                using (StreamWriter streamWriter = new StreamWriter("CarOwners.txt", true, Encoding.Default))
+                XmlReader xmlReader = XmlReader.Create("Books.xml", settings);
+                while (xmlReader.Read()) { };
+
+                // Формирование параметризованной коллекции объектов класса «Книга» из XML–файла, используя класс XmlReader
+                Book book = null;
+                List<Book> books = new List<Book>();
+
+                using (XmlReader reader = XmlReader.Create("Books.xml"))
                 {
-                    foreach (SomeonesCar item in someonesCars.Where(c => c.Color == "красном" && c.FindTheAgeOfTheCar() < 6 && c.Price < 5000))
+                    while (reader.Read())
                     {
-                        streamWriter.WriteLine($"{item.Owner.Name};{item.Owner.Surname};{item.Owner.YearOfBirth};{item.Mark};{item.EngineCapacity};{item.Price};{item.YearOfIssue};{item.Color}");
+                        if (reader.GetAttribute("Genre") != null)
+                        {
+                            book = new Book();
+                            book.Genre = reader.GetAttribute("Genre");
+                        }
+
+                        if (reader.NodeType == XmlNodeType.Element)
+                        {
+                            switch (reader.Name)
+                            {
+                                case "Author": book.Author = reader.ReadElementContentAsString(); break;
+                                case "Title": book.Title = reader.ReadElementContentAsString(); break;
+                                case "PublicationDate": book.PublicationDate = DateTime.Parse(reader.ReadElementContentAsString()); break;
+                                case "NumberOfPages": book.NumberOfPages = int.Parse(reader.ReadElementContentAsString()); books.Add(book); break;
+                            }
+                        }
                     }
                 }
+
+                // Вывод коллекции на экран
+                books.ForEach(b => Console.WriteLine(b));
+
+                // Сериализация отсортированной по авторам коллекции в XML-формате.
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Book>));
+                using (FileStream fstream = new FileStream("Books_new.xml", FileMode.Create, FileAccess.Write))
+                {
+                    xmlSerializer.Serialize(fstream, books.OrderByDescending(b => b.Author).ToList());
+                }
+
+                // Запись информации о книгах заданного жанра в новый файл, используя класс XmlDocument
+                XmlDocument xmlDoc = new XmlDocument();
+
+                XmlNode rootNode = xmlDoc.CreateElement("Books");
+                xmlDoc.AppendChild(rootNode);
+
+                foreach (Book item in books)
+                {
+                    if (item.Genre == "Рассказ")
+                    {
+                        XmlNode bookNode = xmlDoc.CreateElement("Book");
+
+                        XmlAttribute attribute = xmlDoc.CreateAttribute("Genre");
+                        attribute.InnerText = item.Genre;
+                        bookNode.Attributes.Append(attribute);
+
+                        XmlNode authorNode = xmlDoc.CreateElement("Author");
+                        authorNode.InnerText = item.Author;
+                        bookNode.AppendChild(authorNode);
+
+                        XmlNode titleNode = xmlDoc.CreateElement("Title");
+                        titleNode.InnerText = item.Title;
+                        bookNode.AppendChild(titleNode);
+
+                        XmlNode publicationDateNode = xmlDoc.CreateElement("PublicationDate");
+                        publicationDateNode.InnerText = item.PublicationDate.ToLongDateString().ToString();
+                        bookNode.AppendChild(publicationDateNode);
+
+                        XmlNode numberOfPagesNode = xmlDoc.CreateElement("NumberOfPages");
+                        numberOfPagesNode.InnerText = item.NumberOfPages.ToString();
+                        bookNode.AppendChild(numberOfPagesNode);
+
+                        rootNode.AppendChild(bookNode);
+                    }
+                }
+                xmlDoc.Save("BooksTest.xml");
             }
             catch (Exception e)
             {
