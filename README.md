@@ -1,4 +1,4 @@
-# Here is my practice on the basics of C Sharp
+# Here is my practice on the basics of C#
 ## [Homework 1 task](https://github.com/STEP-IT-Academy/CSharp_Basics/blob/HW_1/C%23_HW_1.pdf)
 ## [Homework 2 task](https://github.com/STEP-IT-Academy/CSharp_Basics/blob/HW_2/C%23_HW_2.pdf)
 ## [Homework 3 task](https://github.com/STEP-IT-Academy/CSharp_Basics/blob/HW_3/C%23_HW_3.pdf)
